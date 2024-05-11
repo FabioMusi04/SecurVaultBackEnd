@@ -1,30 +1,31 @@
-import jwt from 'jsonwebtoken';
+import { generateToken } from './jwt.js';
 import bcrypt from 'bcrypt';
 import express from 'express';
 
 const router = express.Router();
 
 router.post('/login', (req, res) => {
-    try{
+    try {
         const { username, password } = req.body;
+        if(!username || !password) return res.status(400).json({ error: 'Username or password is missing' });
+
         const userInfo = {
             id: 1, //remove this
             username: username,
             password: password
         };
-        /* check already in db user */
-        const user = userInfo; // change to db variable
 
-        /* if user  do not exists */
-        if(!user){ // change to db variable
+        /* check already in db user */
+        const user = userInfo;
+        if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        /* if user exists */
-        const passwordMatch = bcrypt.compareSync(password, user.password);
-        if(!passwordMatch){
+
+       /*  const passwordMatch = bcrypt.compareSync(password, user.password);
+        if (!passwordMatch) {
             return res.status(401).json({ error: 'Wrong password' });
-        }
-        const token = jwt.sign({UserId: user.id}, 'secret', {expiresIn: '1h'});
+        } */
+        const token = generateToken({ id: user.id });
         res.status(200).json({ token: token });
     } catch (error) {
         res.status(500).json({ error: error });
@@ -32,7 +33,7 @@ router.post('/login', (req, res) => {
 });
 
 router.post('/register', (req, res) => {
-    try{
+    try {
         const { username, password } = req.body;
         const userInfo = {
             id: 1, //remove this
@@ -43,7 +44,7 @@ router.post('/register', (req, res) => {
         const user = userInfo; // change to db variable
 
         /* if user exists */
-        if(user){ // change to db variable
+        if (user) { // change to db variable
             return res.status(409).json({ error: 'User already exists' });
         }
         /* if user do not exists */
@@ -56,7 +57,7 @@ router.post('/register', (req, res) => {
             salt: salt
         };
         /* add user to db */
-        res.status(201).json({ message: 'User created'});
+        res.status(201).json({ message: 'User created' });
     } catch (error) {
         res.status(500).json({ error: error });
     }

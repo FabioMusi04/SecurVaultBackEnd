@@ -1,8 +1,8 @@
 import express from 'express';
-import utils from '../Utils/utils.js';
+import { verifyToken } from '../Auth/jwt.js';
 const router = express.Router();
 
-router.get('/',  utils.AuthMidVerifyToken  ,(req, res) => {
+router.get('/', verifyToken, (req, res) => {
     res.send('Hello, World!');
 });
 
