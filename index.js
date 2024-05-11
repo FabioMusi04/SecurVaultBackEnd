@@ -1,19 +1,30 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
+import { connectToDatabase } from './Db/db.js';
+
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 dotenv.config();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(cors({
+    origin: process.env.CORS_ORIGIN,
+}));
 
-import router from './Router/router.js';
+connectToDatabase().catch((error) => {
+    console.error(error);
+});
+
 import auth from './Auth/auth.js';
-//import api from './API/api.js';
 
-app.use('/', router);
+import user from './Api/user.js';
+
 app.use('/auth', auth);
-//app.use('/api', api);
+app.use('/user', user);
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
