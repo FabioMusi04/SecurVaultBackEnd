@@ -23,7 +23,6 @@ import auth from './Auth/auth.js';
 
 import user from './Api/user.js';
 
-app.use('/', router);
 app.use('/auth', auth);
 app.use('/user', user);
 
