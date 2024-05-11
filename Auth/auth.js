@@ -6,12 +6,12 @@ const router = express.Router();
 
 router.post('/login', (req, res) => {
     try {
-        const { username, password } = req.body;
-        if(!username || !password) return res.status(400).json({ error: 'Username or password is missing' });
+        const { email, password } = req.body;
+        if(!email || !password) return res.status(400).json({ error: 'email or password is missing' });
 
         const userInfo = {
             id: 1, //remove this
-            username: username,
+            email: email,
             password: password
         };
 
