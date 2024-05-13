@@ -16,6 +16,10 @@ const PasswordSaved = new Schema({
         type: String,
         required: true,
     },
+    icon: {
+        type: String,
+        default: "https://cdn-icons-png.flaticon.com/512/5582/5582931.png",
+    },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now },
 });

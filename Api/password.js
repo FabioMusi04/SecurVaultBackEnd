@@ -21,12 +21,13 @@ Router.get('/passwords', verifyToken, async (req, res) => {
 // Add password saved
 Router.post('/passwords/add', verifyToken, async (req, res) => {
     try {
-        const { website, username, email, password } = req.body;
+        const { website, username, email, password, icon } = req.body;
         const newPassword = new PasswordSaved({
             website,
             username,
             email,
-            password
+            password,
+            icon
         });
         const savedPassword = await newPassword.save();
         await User.findByIdAndUpdate(req.user._id, { $push: { passwords_saved: savedPassword._id } });
@@ -44,7 +45,9 @@ Router.put('/passwords/update/:id', verifyToken, async (req, res) => {
             website,
             username,
             email,
-            password
+            password,
+            icon,
+            updated_at: Date.now()
         }, { new: true });
         res.status(200).json({ message: 'Password updated successfully', password: updatedPassword });
     } catch (error) {
