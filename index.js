@@ -22,9 +22,11 @@ connectToDatabase().catch((error) => {
 import auth from './Auth/auth.js';
 
 import user from './Api/user.js';
+import password from './Api/password.js';
 
 app.use('/auth', auth);
 app.use('/user', user);
+app.use('/password', password);
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

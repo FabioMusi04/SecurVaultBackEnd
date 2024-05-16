@@ -10,7 +10,7 @@ export function verifyToken(req, res, next) {
     try {
         const token = authBearer.split(' ')[1];
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
-        req.userId = decoded.userId;
+        req.userId = decoded.id;
         next();
     } catch (error) {
         res.status(401).json({ error: 'Invalid token' });

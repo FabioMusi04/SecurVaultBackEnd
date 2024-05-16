@@ -12,7 +12,7 @@ const errorHandler = (err, req, res, next) => {
 // Get user info
 Router.get('/info', verifyToken, async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.userId);
         res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
