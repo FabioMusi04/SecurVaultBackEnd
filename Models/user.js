@@ -12,6 +12,7 @@ const UserSchema = new Schema({
         type: String,
         required: true,
     },
+    salt: { type: String, required: true },
     saltRounds: { type: Number, default: 10 },
     email: { type: String, required: true, unique: true },
     profile_image_url: { type: String, default: 'https://placehold.co/600x400' },

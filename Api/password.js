@@ -1,9 +1,9 @@
 import express from 'express';
-import bcrypt from 'bcrypt';
 const Router = express.Router();
 import PasswordSaved from '../Models/passwordSaved.js';
 import { verifyToken } from '../Auth/jwt.js';
 import User from '../Models/user.js';
+import { encrypt, decrypt, deriveKey } from '../Cryptation/crypt.js';
 
 // Middleware for error handling
 const errorHandler = (err, req, res, next) => {
@@ -14,7 +14,18 @@ const errorHandler = (err, req, res, next) => {
 Router.get('/', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId).populate('passwords_saved');
-        const passwords = user.passwords_saved;
+        if(!user) return res.status(404).json({ error: 'User not found' });
+        
+        const userKey = await deriveKey(user.password, user.salt);
+        if(!userKey) return res.status(500).json({ error: 'Internal Server Error while deriving key' });
+        
+
+        const passwords = user.passwords_saved.map(item => {
+            const decryptedPass = decrypt(item.password, userKey);
+            console.log(decryptedPass)
+            return { ...item._doc, password: decryptedPass };
+        });
+
         res.status(200).json(passwords);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
@@ -29,29 +40,30 @@ Router.post('/add', verifyToken, async (req, res) => {
         if (!email && !username) return res.status(400).json({ error: 'Email or username is required' });
         if (email && username) return res.status(400).json({ error: 'Email or username can be used' });
         if (email && !validateEmail(email)) return res.status(400).json({ error: 'Invalid email' });
-        const saltRounds = 10;
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hash = bcrypt.hashSync(password, salt);
+
+        const user = await User.findById(req.userId);
+        if(!user) return res.status(404).json({ error: 'User not found' });
+        
+        const userKey = await deriveKey(user.password, user.salt);
+        if(!userKey) return res.status(500).json({ error: 'Internal Server Error while deriving key' });
+
+        const cryptedpass = encrypt(password, userKey);
 
         let newPassword = null;
         if (email && !username) {
             newPassword = new PasswordSaved({
                 website: website,
                 email: email,
-                password: hash,
+                password: cryptedpass,
                 icon: icon,
-                salt: salt,
-                salt_rounds: saltRounds
             });
         } 
         if (!email && username) {
             newPassword = new PasswordSaved({
                 website: website,
                 username: username,
-                password: hash,
+                password: cryptedpass,
                 icon: icon,
-                salt: salt,
-                salt_rounds: saltRounds
             });
         }
         if(!newPassword) return res.status(400).json({ error: 'Invalid request' });
@@ -65,7 +77,8 @@ Router.post('/add', verifyToken, async (req, res) => {
             await PasswordSaved.findOneAndDelete(savedPassword._id);
             return res.status(500).json({ error: 'Internal Server Error while saving on user' });
         }
-        res.status(201).json({ message: 'Password saved successfully', password: savedPassword });
+        savedPassword.password = password
+        res.status(201).json({ message: 'Password saved successfully', password: savedPassword});
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
     }

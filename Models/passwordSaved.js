@@ -20,13 +20,6 @@ const PasswordSaved = new Schema({
         type: String,
         default: "https://cdn-icons-png.flaticon.com/512/5582/5582931.png",
     },
-    salt: {
-        type: String,
-    },
-    salt_rounds: {
-        type: Number,
-        default: 10,
-    },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now },
 });
