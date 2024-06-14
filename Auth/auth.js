@@ -19,6 +19,7 @@ router.post('/login', async (req, res) => {
         if (!validatePassword(password)) {
             return res.status(400).json({ error: 'Invalid password' });
         }
+        console.log(await User.findOne ({ email: email }));
 
         const userInfo = await User.findOne ({ email: email });
         if(!userInfo) return res.status(404).json({ error: 'User not found' });

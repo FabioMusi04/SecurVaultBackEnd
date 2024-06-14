@@ -4,6 +4,7 @@ import PasswordSaved from '../Models/passwordSaved.js';
 import { verifyToken } from '../Auth/jwt.js';
 import User from '../Models/user.js';
 import { encrypt, decrypt, deriveKey } from '../Cryptation/crypt.js';
+import { validateEmail } from '../Models/Validators/email.js';
 
 // Middleware for error handling
 const errorHandler = (err, req, res, next) => {
@@ -21,7 +22,6 @@ Router.get('/', verifyToken, async (req, res) => {
 
         const passwords = user.passwords_saved.map(item => {
             const decryptedPass = decrypt(item.password, userKey);
-            console.log(decryptedPass)
             return { ...item._doc, password: decryptedPass };
         });
         res.status(200).json(passwords);
@@ -38,7 +38,6 @@ Router.post('/add', verifyToken, async (req, res) => {
         if (!email && !username) return res.status(400).json({ error: 'Email or username is required' });
         if (email && username) return res.status(400).json({ error: 'Email or username can be used' });
         if (email && !validateEmail(email)) return res.status(400).json({ error: 'Invalid email' });
-
         const user = await User.findById(req.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
